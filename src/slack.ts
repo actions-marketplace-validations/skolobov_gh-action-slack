@@ -122,17 +122,16 @@ async function send(
     {
       title: 'Action',
       value: `<https://github.com/${sender?.login}/${repositoryName}/commit/${sha}/checks | ${workflow}>`,
-      short: true,
+      short: true
     },
     {
       title: 'Status',
       value: jobStatus,
-      short: true,
+      short: true
     },
-    // referenceLink,
     {
       title: 'Event',
-      value: eventName,
+      value: eventName ? eventName : '',
       short: true
     }
   ]
