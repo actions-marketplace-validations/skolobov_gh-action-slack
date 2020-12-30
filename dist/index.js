@@ -1420,11 +1420,12 @@ function run() {
             core.debug(JSON.stringify(readEvent()));
             const url = process.env.SLACK_WEBHOOK_URL;
             const jobName = process.env.GITHUB_JOB;
+            const jobText = core.getInput('text', { required: false });
             const jobStatus = core.getInput('status', { required: true }).toUpperCase();
             const jobSteps = JSON.parse(core.getInput('steps', { required: false }) || '{}');
             const channel = core.getInput('channel', { required: false });
             if (url) {
-                yield slack_1.default(url, jobName, jobStatus, jobSteps, channel);
+                yield slack_1.default(url, jobText, jobName, jobStatus, jobSteps, channel);
                 core.debug('Sent to Slack.');
             }
             else {
@@ -6783,7 +6784,7 @@ function stepIcon(status) {
         return ':no_entry_sign:';
     return `:grey_question: ${status}`;
 }
-function send(url, jobName, jobStatus, jobSteps, channel) {
+function send(url, jobText, jobName, jobStatus, jobSteps, channel) {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
         const eventName = process.env.GITHUB_EVENT_NAME;
@@ -6880,8 +6881,8 @@ function send(url, jobName, jobStatus, jobSteps, channel) {
         }
         const fields = [
             {
-                title: 'Action',
-                value: `<https://github.com/${repositoryName}/commit/${sha}/checks | ${workflow}>`,
+                title: 'Action/Job',
+                value: `<https://github.com/${repositoryName}/commit/${sha}/checks | ${workflow}>/ ${jobName}`,
                 short: true
             },
             {
@@ -6896,7 +6897,7 @@ function send(url, jobName, jobStatus, jobSteps, channel) {
             },
             {
                 title: 'Event',
-                value: eventName,
+                value: `${eventName}`,
                 short: true
             }
         ];
@@ -6919,7 +6920,7 @@ function send(url, jobName, jobStatus, jobSteps, channel) {
                     author_link: sender === null || sender === void 0 ? void 0 : sender.html_url,
                     author_icon: sender === null || sender === void 0 ? void 0 : sender.avatar_url,
                     mrkdwn_in: ['text'],
-                    // text,
+                    text: jobText,
                     fields,
                     footer: `<${repositoryUrl}/runs/${runId}|${repositoryName}> #${runNumber}`,
                     footer_icon: 'https://github.githubassets.com/favicon.ico',

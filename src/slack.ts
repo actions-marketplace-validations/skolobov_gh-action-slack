@@ -19,6 +19,7 @@ function stepIcon(status: string): string {
 
 async function send(
   url: string,
+  jobText: string,
   jobName: string,
   jobStatus: string,
   jobSteps: object,
@@ -125,8 +126,8 @@ async function send(
   }
   const fields = [
     {
-      title: 'Action',
-      value: `<https://github.com/${repositoryName}/commit/${sha}/checks | ${workflow}>`,
+      title: 'Action/Job',
+      value: `<https://github.com/${repositoryName}/commit/${sha}/checks | ${workflow}>/ ${jobName}`,
       short: true
     },
     {
@@ -141,7 +142,7 @@ async function send(
     },
     {
       title: 'Event',
-      value: eventName as string,
+      value: `${eventName}`,
       short: true
     }
   ]
@@ -165,7 +166,7 @@ async function send(
         author_link: sender?.html_url,
         author_icon: sender?.avatar_url,
         mrkdwn_in: ['text' as const],
-        // text,
+        text: jobText,
         fields,
         footer: `<${repositoryUrl}/runs/${runId}|${repositoryName}> #${runNumber}`,
         footer_icon: 'https://github.githubassets.com/favicon.ico',
