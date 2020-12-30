@@ -95,6 +95,11 @@ async function send(
         avatar_url: 'https://avatars1.githubusercontent.com/u/9919?s=200&v=4'
       }
       break
+    case 'workflow_dispatch':
+      payload = github.context.payload as EventPayloads.WebhookPayloadWorkflowDispatch
+      ref = payload.ref.replace('refs/heads/', '')
+      sender = payload.sender
+      break
     default: {
       core.info('Unsupported webhook event type. Using environment variables.')
       action = process.env.GITHUB_ACTION?.startsWith('self') ? '' : process.env.GITHUB_ACTION
@@ -121,7 +126,7 @@ async function send(
   const fields = [
     {
       title: 'Action',
-      value: `<https://github.com/${sender?.login}/${repositoryName}/commit/${sha}/checks | ${workflow}>`,
+      value: `<https://github.com/${repositoryName}/commit/${sha}/checks | ${workflow}>`,
       short: true
     },
     {
@@ -130,8 +135,18 @@ async function send(
       short: true
     },
     {
+      title: 'Commit',
+      value: `<https://github.com/${repositoryName}/commit/${sha}>`,
+      short: true
+    },
+    {
+      title: 'Ref',
+      value: branch,
+      Short: true
+    },
+    {
       title: 'Event',
-      value: eventName ? eventName : '',
+      value: eventName as string,
       short: true
     }
   ]
@@ -157,7 +172,7 @@ async function send(
         mrkdwn_in: ['text' as const],
         text,
         fields,
-        footer: `<${repositoryUrl}|${repositoryName}> #${runNumber}`,
+        footer: `<${repositoryUrl}/runs${runNumber}|${repositoryName}> #${runNumber}`,
         footer_icon: 'https://github.githubassets.com/favicon.ico',
         ts: ts.toString()
       }
