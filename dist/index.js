@@ -6774,7 +6774,7 @@ function jobColor(status) {
 }
 function stepIcon(status) {
     if (status.toLowerCase() === 'success')
-        return ':heavy_check_mark:';
+        return ':white_check_mark:';
     if (status.toLowerCase() === 'failure')
         return ':x:';
     if (status.toLowerCase() === 'cancelled')
@@ -6784,7 +6784,7 @@ function stepIcon(status) {
     return `:grey_question: ${status}`;
 }
 function send(url, jobName, jobStatus, jobSteps, channel) {
-    var _a, _b;
+    var _a;
     return __awaiter(this, void 0, void 0, function* () {
         const eventName = process.env.GITHUB_EVENT_NAME;
         const workflow = process.env.GITHUB_WORKFLOW;
@@ -6792,12 +6792,18 @@ function send(url, jobName, jobStatus, jobSteps, channel) {
         const repositoryUrl = `${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}`;
         const runId = process.env.GITHUB_RUN_ID;
         const runNumber = process.env.GITHUB_RUN_NUMBER;
-        const workflowUrl = `${repositoryUrl}/actions/runs/${runId}`;
+        // const workflowUrl = `${repositoryUrl}/actions/runs/${runId}`
         const sha = process.env.GITHUB_SHA;
         const shortSha = sha.slice(0, 8);
-        const branch = process.env.GITHUB_HEAD_REF || ((_a = process.env.GITHUB_REF) === null || _a === void 0 ? void 0 : _a.replace('refs/heads/', ''));
+        // const branch = process.env.GITHUB_HEAD_REF || (process.env.GITHUB_REF?.replace('refs/heads/', '') as string)
         const actor = process.env.GITHUB_ACTOR;
-        let payload, action, ref = branch, refUrl = `${repositoryUrl}/commits/${branch}`, diffRef = shortSha, diffUrl = `${repositoryUrl}/commit/${shortSha}`, title, sender;
+        let payload, action, 
+        // ref = branch,
+        // refUrl = `${repositoryUrl}/commits/${branch}`,
+        // diffRef = shortSha,
+        // diffUrl = `${repositoryUrl}/commit/${shortSha}`,
+        // title,
+        sender;
         const ts = Math.round(new Date().getTime() / 1000);
         switch (eventName) {
             case 'issues':
@@ -6806,10 +6812,10 @@ function send(url, jobName, jobStatus, jobSteps, channel) {
             case 'issue_comment': {
                 payload = github.context.payload;
                 action = payload.action;
-                ref = `#${payload.issue.number}`;
-                refUrl = payload.issue.html_url;
-                diffUrl = payload.issue.comments_url;
-                title = payload.issue.title;
+                // ref = `#${payload.issue.number}`
+                // refUrl = payload.issue.html_url
+                // diffUrl = payload.issue.comments_url
+                // title = payload.issue.title
                 sender = payload.sender;
                 // ts = new Date(payload.issue.updated_at).getTime() / 1000
                 break;
@@ -6817,11 +6823,11 @@ function send(url, jobName, jobStatus, jobSteps, channel) {
             case 'pull_request': {
                 payload = github.context.payload;
                 action = payload.action;
-                ref = `#${payload.number}`;
-                refUrl = payload.pull_request.html_url;
-                diffUrl = `${payload.pull_request.html_url}/files`;
-                diffRef = payload.pull_request.head.ref;
-                title = payload.pull_request.title;
+                // ref = `#${payload.number}`
+                // refUrl = payload.pull_request.html_url
+                // diffUrl = `${payload.pull_request.html_url}/files`
+                // diffRef = payload.pull_request.head.ref
+                // title = payload.pull_request.title
                 sender = payload.sender;
                 // ts = new Date(payload.pull_request.updated_at).getTime() / 1000
                 break;
@@ -6829,17 +6835,17 @@ function send(url, jobName, jobStatus, jobSteps, channel) {
             case 'push': {
                 payload = github.context.payload;
                 action = null;
-                ref = payload.ref.replace('refs/heads/', '');
-                diffUrl = payload.compare;
-                title = `${payload.commits.length} commits`;
+                // ref = payload.ref.replace('refs/heads/', '')
+                // diffUrl = payload.compare
+                // title = `${payload.commits.length} commits`
                 sender = payload.sender;
                 // ts = new Date(payload.commits[0].timestamp).getTime() / 1000
                 break;
             }
             case 'schedule':
                 action = null;
-                ref = process.env.GITHUB_REF.replace('refs/heads/', '');
-                title = `Schedule \`${github.context.payload.schedule}\``;
+                // ref = (process.env.GITHUB_REF as string).replace('refs/heads/', '')
+                // title = `Schedule \`${github.context.payload.schedule}\``
                 sender = {
                     login: 'github',
                     html_url: 'https://github.com/github',
@@ -6848,13 +6854,13 @@ function send(url, jobName, jobStatus, jobSteps, channel) {
                 break;
             case 'workflow_dispatch':
                 payload = github.context.payload;
-                ref = payload.ref.replace('refs/heads/', '');
+                // ref = payload.ref.replace('refs/heads/', '')
                 sender = payload.sender;
                 break;
             default: {
                 core.info('Unsupported webhook event type. Using environment variables.');
-                action = ((_b = process.env.GITHUB_ACTION) === null || _b === void 0 ? void 0 : _b.startsWith('self')) ? '' : process.env.GITHUB_ACTION;
-                ref = process.env.GITHUB_REF.replace('refs/heads/', '');
+                action = ((_a = process.env.GITHUB_ACTION) === null || _a === void 0 ? void 0 : _a.startsWith('self')) ? '' : process.env.GITHUB_ACTION;
+                // ref = (process.env.GITHUB_REF as string).replace('refs/heads/', '')
                 sender = {
                     login: actor,
                     html_url: `https://github.com/${actor}`,
@@ -6862,9 +6868,11 @@ function send(url, jobName, jobStatus, jobSteps, channel) {
                 };
             }
         }
-        const text = `${`*<${workflowUrl}|Workflow _${workflow}_ ` +
-            `job _${jobName}_ triggered by _${eventName}_ is _${jobStatus}_>* ` +
-            `for <${refUrl}|\`${ref}\`>\n`}${title ? `<${diffUrl}|\`${diffRef}\`> - ${title}` : ''}`;
+        // const text = `${
+        //   `*<${workflowUrl}|Workflow _${workflow}_ ` +
+        //   `job _${jobName}_ triggered by _${eventName}_ is _${jobStatus}_>* ` +
+        //   `for <${refUrl}|\`${ref}\`>\n`
+        // }${title ? `<${diffUrl}|\`${diffRef}\`> - ${title}` : ''}`
         // add job steps, if provided
         const checks = [];
         for (const [step, status] of Object.entries(jobSteps)) {
@@ -6883,13 +6891,8 @@ function send(url, jobName, jobStatus, jobSteps, channel) {
             },
             {
                 title: 'Commit',
-                value: `<https://github.com/${repositoryName}/commit/${sha}>`,
+                value: `<https://github.com/${repositoryName}/commit/${sha} | ${shortSha}>`,
                 short: true
-            },
-            {
-                title: 'Ref',
-                value: branch,
-                Short: true
             },
             {
                 title: 'Event',
@@ -6916,9 +6919,9 @@ function send(url, jobName, jobStatus, jobSteps, channel) {
                     author_link: sender === null || sender === void 0 ? void 0 : sender.html_url,
                     author_icon: sender === null || sender === void 0 ? void 0 : sender.avatar_url,
                     mrkdwn_in: ['text'],
-                    text,
+                    // text,
                     fields,
-                    footer: `<${repositoryUrl}/runs/${runNumber}|${repositoryName}> #${runNumber}`,
+                    footer: `<${repositoryUrl}/runs/${runId}|${repositoryName}> #${runNumber}`,
                     footer_icon: 'https://github.githubassets.com/favicon.ico',
                     ts: ts.toString()
                 }

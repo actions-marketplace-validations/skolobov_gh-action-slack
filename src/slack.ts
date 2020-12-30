@@ -10,7 +10,7 @@ function jobColor(status: string): string | undefined {
 }
 
 function stepIcon(status: string): string {
-  if (status.toLowerCase() === 'success') return ':heavy_check_mark:'
+  if (status.toLowerCase() === 'success') return ':white_check_mark:'
   if (status.toLowerCase() === 'failure') return ':x:'
   if (status.toLowerCase() === 'cancelled') return ':exclamation:'
   if (status.toLowerCase() === 'skipped') return ':no_entry_sign:'
@@ -31,20 +31,20 @@ async function send(
 
   const runId = process.env.GITHUB_RUN_ID
   const runNumber = process.env.GITHUB_RUN_NUMBER
-  const workflowUrl = `${repositoryUrl}/actions/runs/${runId}`
+  // const workflowUrl = `${repositoryUrl}/actions/runs/${runId}`
 
   const sha = process.env.GITHUB_SHA as string
   const shortSha = sha.slice(0, 8)
-  const branch = process.env.GITHUB_HEAD_REF || (process.env.GITHUB_REF?.replace('refs/heads/', '') as string)
+  // const branch = process.env.GITHUB_HEAD_REF || (process.env.GITHUB_REF?.replace('refs/heads/', '') as string)
   const actor = process.env.GITHUB_ACTOR
 
   let payload,
     action,
-    ref = branch,
-    refUrl = `${repositoryUrl}/commits/${branch}`,
-    diffRef = shortSha,
-    diffUrl = `${repositoryUrl}/commit/${shortSha}`,
-    title,
+    // ref = branch,
+    // refUrl = `${repositoryUrl}/commits/${branch}`,
+    // diffRef = shortSha,
+    // diffUrl = `${repositoryUrl}/commit/${shortSha}`,
+    // title,
     sender
   const ts = Math.round(new Date().getTime() / 1000)
 
@@ -55,10 +55,10 @@ async function send(
     case 'issue_comment': {
       payload = github.context.payload as EventPayloads.WebhookPayloadIssueComment
       action = payload.action
-      ref = `#${payload.issue.number}`
-      refUrl = payload.issue.html_url
-      diffUrl = payload.issue.comments_url
-      title = payload.issue.title
+      // ref = `#${payload.issue.number}`
+      // refUrl = payload.issue.html_url
+      // diffUrl = payload.issue.comments_url
+      // title = payload.issue.title
       sender = payload.sender
       // ts = new Date(payload.issue.updated_at).getTime() / 1000
       break
@@ -66,11 +66,11 @@ async function send(
     case 'pull_request': {
       payload = github.context.payload as EventPayloads.WebhookPayloadPullRequest
       action = payload.action
-      ref = `#${payload.number}`
-      refUrl = payload.pull_request.html_url
-      diffUrl = `${payload.pull_request.html_url}/files`
-      diffRef = payload.pull_request.head.ref
-      title = payload.pull_request.title
+      // ref = `#${payload.number}`
+      // refUrl = payload.pull_request.html_url
+      // diffUrl = `${payload.pull_request.html_url}/files`
+      // diffRef = payload.pull_request.head.ref
+      // title = payload.pull_request.title
       sender = payload.sender
       // ts = new Date(payload.pull_request.updated_at).getTime() / 1000
       break
@@ -78,17 +78,17 @@ async function send(
     case 'push': {
       payload = github.context.payload as EventPayloads.WebhookPayloadPush
       action = null
-      ref = payload.ref.replace('refs/heads/', '')
-      diffUrl = payload.compare
-      title = `${payload.commits.length} commits`
+      // ref = payload.ref.replace('refs/heads/', '')
+      // diffUrl = payload.compare
+      // title = `${payload.commits.length} commits`
       sender = payload.sender
       // ts = new Date(payload.commits[0].timestamp).getTime() / 1000
       break
     }
     case 'schedule':
       action = null
-      ref = (process.env.GITHUB_REF as string).replace('refs/heads/', '')
-      title = `Schedule \`${github.context.payload.schedule}\``
+      // ref = (process.env.GITHUB_REF as string).replace('refs/heads/', '')
+      // title = `Schedule \`${github.context.payload.schedule}\``
       sender = {
         login: 'github',
         html_url: 'https://github.com/github',
@@ -97,13 +97,13 @@ async function send(
       break
     case 'workflow_dispatch':
       payload = github.context.payload as EventPayloads.WebhookPayloadWorkflowDispatch
-      ref = payload.ref.replace('refs/heads/', '')
+      // ref = payload.ref.replace('refs/heads/', '')
       sender = payload.sender
       break
     default: {
       core.info('Unsupported webhook event type. Using environment variables.')
       action = process.env.GITHUB_ACTION?.startsWith('self') ? '' : process.env.GITHUB_ACTION
-      ref = (process.env.GITHUB_REF as string).replace('refs/heads/', '')
+      // ref = (process.env.GITHUB_REF as string).replace('refs/heads/', '')
       sender = {
         login: actor,
         html_url: `https://github.com/${actor}`,
@@ -112,11 +112,11 @@ async function send(
     }
   }
 
-  const text = `${
-    `*<${workflowUrl}|Workflow _${workflow}_ ` +
-    `job _${jobName}_ triggered by _${eventName}_ is _${jobStatus}_>* ` +
-    `for <${refUrl}|\`${ref}\`>\n`
-  }${title ? `<${diffUrl}|\`${diffRef}\`> - ${title}` : ''}`
+  // const text = `${
+  //   `*<${workflowUrl}|Workflow _${workflow}_ ` +
+  //   `job _${jobName}_ triggered by _${eventName}_ is _${jobStatus}_>* ` +
+  //   `for <${refUrl}|\`${ref}\`>\n`
+  // }${title ? `<${diffUrl}|\`${diffRef}\`> - ${title}` : ''}`
 
   // add job steps, if provided
   const checks: string[] = []
@@ -136,13 +136,8 @@ async function send(
     },
     {
       title: 'Commit',
-      value: `<https://github.com/${repositoryName}/commit/${sha}>`,
+      value: `<https://github.com/${repositoryName}/commit/${sha} | ${shortSha}>`,
       short: true
-    },
-    {
-      title: 'Ref',
-      value: branch,
-      Short: true
     },
     {
       title: 'Event',
@@ -170,9 +165,9 @@ async function send(
         author_link: sender?.html_url,
         author_icon: sender?.avatar_url,
         mrkdwn_in: ['text' as const],
-        text,
+        // text,
         fields,
-        footer: `<${repositoryUrl}/runs/${runNumber}|${repositoryName}> #${runNumber}`,
+        footer: `<${repositoryUrl}/runs/${runId}|${repositoryName}> #${runNumber}`,
         footer_icon: 'https://github.githubassets.com/favicon.ico',
         ts: ts.toString()
       }
