@@ -114,7 +114,7 @@ async function send(
 
   const text = `${
     `*<${workflowUrl}|Workflow _${workflow}_ ` +
-    `job? _${jobName}_ triggered by _${eventName}_ is _${jobStatus}_>* ` +
+    `job _${jobName}_ triggered by _${eventName}_ is _${jobStatus}_>* ` +
     `for <${refUrl}|\`${ref}\`>\n`
   }${title ? `<${diffUrl}|\`${diffRef}\`> - ${title}` : ''}`
 

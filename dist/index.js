@@ -6846,6 +6846,11 @@ function send(url, jobName, jobStatus, jobSteps, channel) {
                     avatar_url: 'https://avatars1.githubusercontent.com/u/9919?s=200&v=4'
                 };
                 break;
+            case 'workflow_dispatch':
+                payload = github.context.payload;
+                ref = payload.ref.replace('refs/heads/', '');
+                sender = payload.sender;
+                break;
             default: {
                 core.info('Unsupported webhook event type. Using environment variables.');
                 action = ((_b = process.env.GITHUB_ACTION) === null || _b === void 0 ? void 0 : _b.startsWith('self')) ? '' : process.env.GITHUB_ACTION;
@@ -6858,7 +6863,7 @@ function send(url, jobName, jobStatus, jobSteps, channel) {
             }
         }
         const text = `${`*<${workflowUrl}|Workflow _${workflow}_ ` +
-            `job? _${jobName}_ triggered by _${eventName}_ is _${jobStatus}_>* ` +
+            `job _${jobName}_ triggered by _${eventName}_ is _${jobStatus}_>* ` +
             `for <${refUrl}|\`${ref}\`>\n`}${title ? `<${diffUrl}|\`${diffRef}\`> - ${title}` : ''}`;
         // add job steps, if provided
         const checks = [];
@@ -6868,7 +6873,7 @@ function send(url, jobName, jobStatus, jobSteps, channel) {
         const fields = [
             {
                 title: 'Action',
-                value: `<https://github.com/${sender === null || sender === void 0 ? void 0 : sender.login}/${repositoryName}/commit/${sha}/checks | ${workflow}>`,
+                value: `<https://github.com/${repositoryName}/commit/${sha}/checks | ${workflow}>`,
                 short: true
             },
             {
@@ -6877,8 +6882,18 @@ function send(url, jobName, jobStatus, jobSteps, channel) {
                 short: true
             },
             {
+                title: 'Commit',
+                value: `<https://github.com/${repositoryName}/commit/${sha}>`,
+                short: true
+            },
+            {
+                title: 'Ref',
+                value: branch,
+                Short: true
+            },
+            {
                 title: 'Event',
-                value: eventName ? eventName : '',
+                value: eventName,
                 short: true
             }
         ];
@@ -6903,7 +6918,7 @@ function send(url, jobName, jobStatus, jobSteps, channel) {
                     mrkdwn_in: ['text'],
                     text,
                     fields,
-                    footer: `<${repositoryUrl}|${repositoryName}> #${runNumber}`,
+                    footer: `<${repositoryUrl}/runs/${runNumber}|${repositoryName}> #${runNumber}`,
                     footer_icon: 'https://github.githubassets.com/favicon.ico',
                     ts: ts.toString()
                 }
