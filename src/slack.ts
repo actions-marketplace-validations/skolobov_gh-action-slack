@@ -172,7 +172,7 @@ async function send(
         mrkdwn_in: ['text' as const],
         text,
         fields,
-        footer: `<${repositoryUrl}/runs${runNumber}|${repositoryName}> #${runNumber}`,
+        footer: `<${repositoryUrl}/runs/${runNumber}|${repositoryName}> #${runNumber}`,
         footer_icon: 'https://github.githubassets.com/favicon.ico',
         ts: ts.toString()
       }
