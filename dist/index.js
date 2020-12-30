@@ -6882,7 +6882,7 @@ function send(url, jobText, jobName, jobStatus, jobSteps, channel) {
         const fields = [
             {
                 title: 'Action/Job',
-                value: `<https://github.com/${repositoryName}/commit/${sha}/checks | ${workflow}>/ ${jobName}`,
+                value: `<https://github.com/${repositoryName}/commit/${sha}/checks | ${workflow}> -> ${jobName}`,
                 short: true
             },
             {
