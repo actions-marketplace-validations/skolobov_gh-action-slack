@@ -118,7 +118,24 @@ async function send(
   for (const [step, status] of Object.entries(jobSteps)) {
     checks.push(`${stepIcon(status.outcome)} ${step}`)
   }
-  const fields = []
+  const fields = [
+    {
+      title: 'Action',
+      value: `<https://github.com/${sender?.login}/${repositoryName}/commit/${sha}/checks | ${workflow}>`,
+      short: true,
+    },
+    {
+      title: 'Status',
+      value: jobStatus,
+      short: true,
+    },
+    // referenceLink,
+    {
+      title: 'Event',
+      value: eventName,
+      short: true
+    }
+  ]
   if (checks.length) {
     fields.push({
       title: 'Job Steps',
