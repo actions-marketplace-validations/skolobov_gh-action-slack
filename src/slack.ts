@@ -2,6 +2,7 @@ import * as core from '@actions/core'
 import * as github from '@actions/github'
 import {EventPayloads} from '@octokit/webhooks'
 import {IncomingWebhook, IncomingWebhookResult} from '@slack/webhook'
+import {SendDTO} from './sendDTO'
 
 function jobColor(status: string): string | undefined {
   if (status.toLowerCase() === 'success') return 'good'
@@ -17,14 +18,19 @@ function stepIcon(status: string): string {
   return `:grey_question: ${status}`
 }
 
-async function send(
-  url: string,
-  jobText: string,
-  jobName: string,
-  jobStatus: string,
-  jobSteps: object,
-  channel?: string
-): Promise<IncomingWebhookResult> {
+function isStepError(status: string): boolean {
+  return status.toLowerCase() === 'failure' || status.toLowerCase() === 'cancelled'
+}
+
+async function send({
+  url,
+  jobText,
+  jobName,
+  jobStatus,
+  jobSteps,
+  channel,
+  jobNotifyChannelOnFail
+}: SendDTO): Promise<IncomingWebhookResult> {
   const eventName = process.env.GITHUB_EVENT_NAME
   const workflow = process.env.GITHUB_WORKFLOW
   const repositoryName = process.env.GITHUB_REPOSITORY
@@ -113,17 +119,15 @@ async function send(
     }
   }
 
-  // const text = `${
-  //   `*<${workflowUrl}|Workflow _${workflow}_ ` +
-  //   `job _${jobName}_ triggered by _${eventName}_ is _${jobStatus}_>* ` +
-  //   `for <${refUrl}|\`${ref}\`>\n`
-  // }${title ? `<${diffUrl}|\`${diffRef}\`> - ${title}` : ''}`
-
   // add job steps, if provided
   const checks: string[] = []
+  let shouldNotifyChannel = false
   for (const [step, status] of Object.entries(jobSteps)) {
     checks.push(`${stepIcon(status.outcome)} ${step}`)
+    shouldNotifyChannel = isStepError(status.outcome)
   }
+
+  const text = `${jobText}${jobNotifyChannelOnFail && shouldNotifyChannel ? ' @here' : ''}`
   const fields = [
     {
       title: 'Action/Job',
@@ -166,7 +170,7 @@ async function send(
         author_link: sender?.html_url,
         author_icon: sender?.avatar_url,
         mrkdwn_in: ['text' as const],
-        text: jobText,
+        text,
         fields,
         footer: `<${repositoryUrl}/runs/${runId}|${repositoryName}> #${runNumber}`,
         footer_icon: 'https://github.githubassets.com/favicon.ico',

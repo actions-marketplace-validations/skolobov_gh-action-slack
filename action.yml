@@ -2,7 +2,7 @@ name: slack - GitHub Actions Slack integration
 description: Notify Slack of GitHub Actions workflows, jobs and step status.
 author: satterly
 inputs:
-  test:
+  text:
     description: Text message.
     required: false
   status:
@@ -13,6 +13,9 @@ inputs:
     required: false
   channel:
     description: Override default channel with different channel or username
+    required: false
+  notifyChannelOnFail:
+    description: Add @here to message when there is an error
     required: false
 runs:
   using: 'node12'

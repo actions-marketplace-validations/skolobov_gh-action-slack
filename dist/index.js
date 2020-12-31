@@ -1424,8 +1424,9 @@ function run() {
             const jobStatus = core.getInput('status', { required: true }).toUpperCase();
             const jobSteps = JSON.parse(core.getInput('steps', { required: false }) || '{}');
             const channel = core.getInput('channel', { required: false });
+            const jobNotifyChannelOnFail = core.getInput('notifyChannelOnFail', { required: false }) === 'true';
             if (url) {
-                yield slack_1.default(url, jobText, jobName, jobStatus, jobSteps, channel);
+                yield slack_1.default({ url, jobText, jobName, jobStatus, jobSteps, channel, jobNotifyChannelOnFail });
                 core.debug('Sent to Slack.');
             }
             else {
@@ -6784,7 +6785,10 @@ function stepIcon(status) {
         return ':no_entry_sign:';
     return `:grey_question: ${status}`;
 }
-function send(url, jobText, jobName, jobStatus, jobSteps, channel) {
+function isStepError(status) {
+    return status.toLowerCase() === 'failure' || status.toLowerCase() === 'cancelled';
+}
+function send({ url, jobText, jobName, jobStatus, jobSteps, channel, jobNotifyChannelOnFail }) {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
         const eventName = process.env.GITHUB_EVENT_NAME;
@@ -6869,16 +6873,14 @@ function send(url, jobText, jobName, jobStatus, jobSteps, channel) {
                 };
             }
         }
-        // const text = `${
-        //   `*<${workflowUrl}|Workflow _${workflow}_ ` +
-        //   `job _${jobName}_ triggered by _${eventName}_ is _${jobStatus}_>* ` +
-        //   `for <${refUrl}|\`${ref}\`>\n`
-        // }${title ? `<${diffUrl}|\`${diffRef}\`> - ${title}` : ''}`
         // add job steps, if provided
         const checks = [];
+        let shouldNotifyChannel = false;
         for (const [step, status] of Object.entries(jobSteps)) {
             checks.push(`${stepIcon(status.outcome)} ${step}`);
+            shouldNotifyChannel = isStepError(status.outcome);
         }
+        const text = `${jobText}${jobNotifyChannelOnFail && shouldNotifyChannel ? ' @here' : ''}`;
         const fields = [
             {
                 title: 'Action/Job',
@@ -6920,7 +6922,7 @@ function send(url, jobText, jobName, jobStatus, jobSteps, channel) {
                     author_link: sender === null || sender === void 0 ? void 0 : sender.html_url,
                     author_icon: sender === null || sender === void 0 ? void 0 : sender.avatar_url,
                     mrkdwn_in: ['text'],
-                    text: jobText,
+                    text,
                     fields,
                     footer: `<${repositoryUrl}/runs/${runId}|${repositoryName}> #${runNumber}`,
                     footer_icon: 'https://github.githubassets.com/favicon.ico',
