@@ -127,7 +127,7 @@ async function send({
     shouldNotifyChannel = isStepError(status.outcome)
   }
 
-  const text = `${jobText}${jobNotifyChannelOnFail && shouldNotifyChannel ? ' @here' : ''}`
+  const text = `${jobText}${jobNotifyChannelOnFail && shouldNotifyChannel ? ' <!here>' : ''}`
   const fields = [
     {
       title: 'Action/Job',
@@ -172,7 +172,7 @@ async function send({
         mrkdwn_in: ['text' as const],
         text,
         fields,
-        footer: `<${repositoryUrl}/runs/${runId}|${repositoryName}> #${runNumber}`,
+        footer: `<${repositoryUrl}/actions/runs/${runId}|${repositoryName}> #${runNumber}`,
         footer_icon: 'https://github.githubassets.com/favicon.ico',
         ts: ts.toString()
       }

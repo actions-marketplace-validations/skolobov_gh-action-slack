@@ -6880,7 +6880,7 @@ function send({ url, jobText, jobName, jobStatus, jobSteps, channel, jobNotifyCh
             checks.push(`${stepIcon(status.outcome)} ${step}`);
             shouldNotifyChannel = isStepError(status.outcome);
         }
-        const text = `${jobText}${jobNotifyChannelOnFail && shouldNotifyChannel ? ' @here' : ''}`;
+        const text = `${jobText}${jobNotifyChannelOnFail && shouldNotifyChannel ? ' <!here>' : ''}`;
         const fields = [
             {
                 title: 'Action/Job',
@@ -6924,7 +6924,7 @@ function send({ url, jobText, jobName, jobStatus, jobSteps, channel, jobNotifyCh
                     mrkdwn_in: ['text'],
                     text,
                     fields,
-                    footer: `<${repositoryUrl}/runs/${runId}|${repositoryName}> #${runNumber}`,
+                    footer: `<${repositoryUrl}/actions/runs/${runId}|${repositoryName}> #${runNumber}`,
                     footer_icon: 'https://github.githubassets.com/favicon.ico',
                     ts: ts.toString()
                 }
