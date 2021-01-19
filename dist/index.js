@@ -6791,6 +6791,15 @@ function isStepError(status) {
 function send({ url, jobText, jobName, jobStatus, jobSteps, channel, jobNotifyChannelOnFail }) {
     var _a;
     return __awaiter(this, void 0, void 0, function* () {
+        core.debug(`Config: ${JSON.stringify({
+            url,
+            jobText,
+            jobName,
+            jobStatus,
+            jobSteps,
+            channel,
+            jobNotifyChannelOnFail
+        })}`);
         const eventName = process.env.GITHUB_EVENT_NAME;
         const workflow = process.env.GITHUB_WORKFLOW;
         const repositoryName = process.env.GITHUB_REPOSITORY;
@@ -6879,7 +6888,9 @@ function send({ url, jobText, jobName, jobStatus, jobSteps, channel, jobNotifyCh
         for (const [step, status] of Object.entries(jobSteps)) {
             checks.push(`${stepIcon(status.outcome)} ${step}`);
             shouldNotifyChannel = isStepError(status.outcome);
+            core.debug(`${step} - ${status.outcome} - shouldNotifyChannel=${shouldNotifyChannel}`);
         }
+        core.debug(`Alert channel= ${jobNotifyChannelOnFail && shouldNotifyChannel ? ' <!here>' : ''}`);
         const text = `${jobText}${jobNotifyChannelOnFail && shouldNotifyChannel ? ' <!here>' : ''}`;
         const fields = [
             {
