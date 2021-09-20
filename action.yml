@@ -1,6 +1,6 @@
-name: slack - GitHub Actions Slack integration
+name: gh-action-slack - GitHub Actions Slack integration
 description: Notify Slack of GitHub Actions workflows, jobs and step status.
-author: satterly
+author: skolobov
 inputs:
   text:
     description: Text message.
@@ -18,7 +18,7 @@ inputs:
     description: Add @here to message when there is an error
     required: false
 runs:
-  using: 'node12'
+  using: 'node14'
   main: 'dist/index.js'
 branding:
   icon: alert-circle
